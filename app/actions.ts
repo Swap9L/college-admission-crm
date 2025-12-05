@@ -35,11 +35,12 @@ export async function authenticate(prevState: string | undefined, formData: Form
 
 export async function uploadStudents(data: any[]) {
   const user = await getCurrentUser();
-  if (!user) throw new Error("Unauthorized");
+  
+  // 1. Strict check: ensure user AND user.id exist
+  if (!user || !user.id) throw new Error("Unauthorized");
 
   const studentsToCreate = data
     .map((row) => {
-      // FIX: robustly check for Previous Course with or without spaces
       const prevCourseVal = 
         row["Previous Course"] || 
         row["PreviousCourse"] || 
@@ -51,11 +52,12 @@ export async function uploadStudents(data: any[]) {
         name: String(row.Name || row.name || "").trim(),
         phone: String(row.Phone || row.phone || "").trim(),
         address: (row.Address || row.address) ? String(row.Address || row.address) : null,
-        prevCourse: prevCourseVal ? String(prevCourseVal) : null, // <--- SAVING CORRECTLY
-        uploadedById: user.id,
+        prevCourse: prevCourseVal ? String(prevCourseVal) : null,
+        
+        // 2. FIX: Force TypeScript to treat this as a string
+        uploadedById: user.id as string, 
       };
     })
-    // Filter out invalid rows
     .filter(s => s.name.length > 0 && s.phone.length > 0 && s.phone !== "undefined");
 
   if (studentsToCreate.length === 0) {
