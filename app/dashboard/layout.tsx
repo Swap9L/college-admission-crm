@@ -24,7 +24,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <div className="flex h-14 items-center border-b px-6">
             <Link className="flex items-center gap-2 font-semibold" href="#">
               <GraduationCap className="h-6 w-6 text-blue-600" />
-              <span>UniCRM</span>
+              <span>VCK Admissions/span>
             </Link>
           </div>
 
