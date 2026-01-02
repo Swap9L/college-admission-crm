@@ -65,12 +65,12 @@ export function FacultyClient({ facultyList, currentUser }: { facultyList: any[]
               // --- PERMISSION LOGIC ---
 
               // 1. Can I manage (Edit Role / Delete / Reset Pass) this person?
-              // Super Admin can manage anyone (except self).
-              // Admin can ONLY manage Faculty (not Super Admin, not other Admins).
-              const canManage = !isMe && (
-                  isSuperAdmin || 
-                  (isAdmin && !targetIsSuper && !targetIsAdmin)
-              );
+                  // Super Admin can manage anyone (except self).
+                  // Admin can ONLY manage Faculty (not Super Admin, not other Admins).
+                  const canManage = !isMe && (
+                    isSuperAdmin || 
+                    (isAdmin && !targetIsSuper && !targetIsAdmin)
+                  );
 
               return (
               <TableRow key={f.id} className={isMe ? "bg-blue-50/50" : ""}>
@@ -92,7 +92,7 @@ export function FacultyClient({ facultyList, currentUser }: { facultyList: any[]
                                 
                                 {/* Only Super Admin can promote someone to Super Admin */}
                                 {isSuperAdmin && (
-                                    <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
+                                  <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
                                 )}
                             </SelectContent>
                          </Select>

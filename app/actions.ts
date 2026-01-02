@@ -138,15 +138,15 @@ export async function deleteFaculty(formData: FormData) {
   const targetUser = await db.user.findUnique({ where: { id: targetUserId }});
   if (!targetUser) return;
 
-  // RULE: Admins cannot delete other Admins or Super Admins
-  if (currentUserRole === Role.ADMIN) {
-      if (targetUser.role === Role.ADMIN || targetUser.role === Role.SUPER_ADMIN) {
+      // RULE: Admins cannot delete other Admins or Super Admins
+      if (currentUserRole === Role.ADMIN) {
+        if (targetUser.role === Role.ADMIN || targetUser.role === Role.SUPER_ADMIN) {
           throw new Error("Admins can only remove Faculty.");
+        }
       }
-  }
 
-  // RULE: Nobody can delete themselves
-  if (targetUserId === currentUserId) return;
+      // RULE: Nobody can delete themselves
+      if (targetUserId === currentUserId) return;
 
   await db.user.delete({ where: { id: targetUserId }});
   revalidatePath("/dashboard/faculty");
@@ -173,13 +173,13 @@ export async function adminResetPassword(formData: FormData) {
   const targetUser = await db.user.findUnique({ where: { id } });
   if (!targetUser) throw new Error("User not found");
 
-  // 3. HIERARCHY CHECK
-  // If I am an ADMIN, I cannot touch SUPER_ADMIN or other ADMINS
-  if (currentUserRole === Role.ADMIN) {
-      if (targetUser.role === Role.SUPER_ADMIN || targetUser.role === Role.ADMIN) {
+      // 3. HIERARCHY CHECK
+      // If I am an ADMIN, I cannot touch SUPER_ADMIN or other ADMINS
+      if (currentUserRole === Role.ADMIN) {
+        if (targetUser.role === Role.SUPER_ADMIN || targetUser.role === Role.ADMIN) {
           throw new Error("Admins can only reset passwords for Faculty.");
+        }
       }
-  }
 
   const hashedPassword = await bcrypt.hash(newPassword, 10);
 
@@ -201,8 +201,8 @@ export async function getDashboardStats() {
   if(!user) return null;
   const role = (user as any).role;
 
-  // If Admin, fetch all. If Faculty, fetch only theirs.
-  const where = role === Role.SUPER_ADMIN ? {} : { uploadedById: user.id };
+  // If Admin or Super Admin, fetch all. If Faculty, fetch only theirs.
+  const where = (role === Role.SUPER_ADMIN || role === Role.ADMIN) ? {} : { uploadedById: user.id };
 
   const total = await db.student.count({ where });
   
@@ -227,10 +227,10 @@ export async function updateUserRole(formData: FormData) {
   const session = await auth();
   const currentUserRole = (session?.user as any).role;
 
-  // ONLY SUPER ADMIN CAN CHANGE ROLES
-  if (currentUserRole !== Role.SUPER_ADMIN) {
-      return { error: "Only Super Admin can change roles." };
-  }
+      // ONLY SUPER ADMIN CAN CHANGE ROLES
+      if (currentUserRole !== Role.SUPER_ADMIN) {
+        return { error: "Only Super Admin can change roles." };
+      }
 
   const targetUserId = formData.get("id") as string;
   const newRole = formData.get("newRole") as Role;
